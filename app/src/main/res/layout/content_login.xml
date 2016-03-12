@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/sign_up_page_background"
+        android:src="@drawable/login_screen_image"
+        android:fitsSystemWindows="true"
+        android:scaleType="centerCrop"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/above_image_layer">
+    </View>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:gravity="bottom"
+   >
+
+
+    <Button
+        android:layout_height="50dp"
+        android:layout_width="match_parent"
+        android:background="@drawable/background_rectangle"
+        android:text="Login with Facebook"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        android:textColor="#e2ffffff"
+        android:id="@+id/facebook_sign_up"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif"/>
+
+    <Button
+        android:layout_height="50dp"
+        android:layout_width="match_parent"
+        android:background="@drawable/background_rectangle"
+        android:text="Login with Google"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif"
+        android:textColor="#e2ffffff"
+        android:id="@+id/google_sign_up" />
+
+</LinearLayout>
+</FrameLayout>

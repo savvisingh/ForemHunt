@@ -1,0 +1,61 @@
+{
+  "project_info": {
+    "project_id": "foremhunt",
+    "project_number": "568384867925",
+    "name": "ForemHunt"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568384867925:android:b79794bc209c5160",
+        "client_id": "android:com.example.sarabjeetsingh.beacondetector",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.example.sarabjeetsingh.beacondetector",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "568384867925-n5i3tjed24hkq0ih83eose6j0htpeemk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sarabjeetsingh.beacondetector",
+            "certificate_hash": "C96DB15F1E55053575E82F94CD9436EB353E33FE"
+          }
+        },
+        {
+          "client_id": "568384867925-25vnfm40c4634l1rsjrvnd6fug9ruetj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "568384867925-25vnfm40c4634l1rsjrvnd6fug9ruetj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
