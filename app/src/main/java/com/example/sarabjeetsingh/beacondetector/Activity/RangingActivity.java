@@ -1,10 +1,12 @@
-package com.example.sarabjeetsingh.beacondetector;
+package com.example.sarabjeetsingh.beacondetector.Activity;
 
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+
+import com.example.sarabjeetsingh.beacondetector.R;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;

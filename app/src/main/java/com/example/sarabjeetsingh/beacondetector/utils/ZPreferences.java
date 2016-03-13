@@ -1,4 +1,4 @@
-package com.example.sarabjeetsingh.beacondetector;
+package com.example.sarabjeetsingh.beacondetector.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
