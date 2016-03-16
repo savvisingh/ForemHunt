@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.example.sarabjeetsingh.beacondetector.Activity.MainActivity;
+import com.example.sarabjeetsingh.beacondetector.Activity.HomeActivity;
 import com.example.sarabjeetsingh.beacondetector.R;
 import com.parse.Parse;
 import com.parse.ParseACL;
@@ -36,9 +36,17 @@ public class MyApplication extends Application implements BootstrapNotifier
     private RegionBootstrap regionBootstrap;
     private BeaconManager mBeaconManager;
     private BackgroundPowerSaver backgroundPowerSaver;
-    private MainActivity monitoringActivity = null;
+    private HomeActivity monitoringActivity = null;
 
-    List<Region> region_list = new ArrayList();
+    List<Region> region_list ;
+
+    String[] instanceIds ;
+    Identifier myBeaconNamespaceId;
+    Identifier myBeaconsInstanceId;
+
+    int current_level = 0;
+
+    String beacon_detected_instance_id;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -58,6 +66,8 @@ public class MyApplication extends Application implements BootstrapNotifier
         // defaultACL.setPublicWriteAccess(true);
         ParseACL.setDefaultACL(defaultACL, true);
 
+        region_list = new ArrayList<>();
+        instanceIds = getResources().getStringArray(R.array.instanceId_beacons);
         mBeaconManager = org.altbeacon.beacon.BeaconManager.getInstanceForApplication(this);
         mBeaconManager.getBeaconParsers().clear();
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
@@ -66,10 +76,15 @@ public class MyApplication extends Application implements BootstrapNotifier
         mBeaconManager.setBackgroundBetweenScanPeriod(10000);
        // mBeaconManager.bind(this);
         // wake up the app when any beacon is seen (you can specify specific id filers in the parameters below)
-        Identifier myBeaconNamespaceId = Identifier.parse("0x5dc33487f02e477d4058");
-        Region region = new Region("my-beacon-region", myBeaconNamespaceId, null, null);
+        Identifier myBeaconNamespaceId = Identifier.parse("0x5DC33487F02E477D4058");
 
-        region_list.add(region);
+        for(int i = 0; i < 3 ;i++){
+            myBeaconsInstanceId = Identifier.parse(instanceIds[i]);
+            Region region = new Region("my-beacon-region level-"+ Integer.valueOf(i), myBeaconNamespaceId, myBeaconsInstanceId, null);
+            region_list.add(region);
+        }
+
+        Log.d("size", String.valueOf(region_list.size()));
         regionBootstrap = new RegionBootstrap(this, region_list);
 
         backgroundPowerSaver = new BackgroundPowerSaver(this);
@@ -80,25 +95,21 @@ public class MyApplication extends Application implements BootstrapNotifier
     public void didEnterRegion(Region arg0) {
         // In this example, this class sends a notification to the user whenever a Beacon
         // matching a Region (defined above) are first seen.
-        Log.d(TAG, "did enter region." + arg0.getId1() + " " + arg0.getId2() + " " + arg0.getId3());
 
-//        if (!haveDetectedBeaconsSinceBoot) {
-//            Log.d(TAG, "auto launching MainActivity");
-//
-//            // The very first time since boot that we detect an beacon, we launch the
-//            // MainActivity
-//            Intent intent = new Intent(this, MainActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            // Important:  make sure to add android:launchMode="singleInstance" in the manifest
-//            // to keep multiple copies of this activity from getting created if the user has
-//            // already manually launched the app.
-//            this.startActivity(intent);
-//            haveDetectedBeaconsSinceBoot = true;
-//        } else {
+
+        current_level = Integer.valueOf(ZPreferences.getHuntLevel(this));
+        beacon_detected_instance_id = arg0.getId2().toString();
+
+        Log.d(TAG, "did enter region." + arg0.getId1() + " " + beacon_detected_instance_id);
+
+        if(instanceIds[current_level].equals(beacon_detected_instance_id)){
+            current_level++;
+            ZPreferences.setHuntLevel(this, String.valueOf(current_level));
             if (monitoringActivity != null) {
                 // If the Monitoring Activity is visible, we log info about the beacons we have
                 // seen on its display
-                monitoringActivity.logToDisplay("I see a beacon again" );
+                monitoringActivity.logToDisplay(String.valueOf(current_level));
+                sendNotification();
             } else {
                 // If we have already seen beacons before, but the monitoring activity is not in
                 // the foreground, we send a notification to the user on subsequent detections.
@@ -108,32 +119,30 @@ public class MyApplication extends Application implements BootstrapNotifier
         }
 
 
+        }
+
+
     @Override
     public void didExitRegion(Region region) {
         Log.d(TAG, "Called DidExitRegion");
-        if (monitoringActivity != null) {
-            monitoringActivity.logToDisplay("I no longer see a beacon.");
-        }
     }
 
     @Override
     public void didDetermineStateForRegion(int state, Region region) {
-        if (monitoringActivity != null) {
-            monitoringActivity.logToDisplay("I have just switched from seeing/not seeing beacons: " + state);
-        }
+
     }
 
     private void sendNotification() {
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
-                        .setContentTitle("Beacon Reference Application")
-                        .setContentText("An beacon is nearby.")
+                        .setContentTitle("Hurray you have solved the Clue")
+                        .setContentText("Your level has upgraded. Tap to see clue...")
                         .setSmallIcon(R.mipmap.ic_launcher);
 
         TaskStackBuilder stackBuilder = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
             stackBuilder = TaskStackBuilder.create(this);
-            stackBuilder.addNextIntent(new Intent(this, MainActivity.class));
+            stackBuilder.addNextIntent(new Intent(this, HomeActivity.class));
             PendingIntent resultPendingIntent =
                     stackBuilder.getPendingIntent(
                             0,
@@ -148,7 +157,7 @@ public class MyApplication extends Application implements BootstrapNotifier
 
     }
 
-    public void setMonitoringActivity(MainActivity activity) {
+    public void setMonitoringActivity(HomeActivity activity) {
         this.monitoringActivity = activity;
     }
 

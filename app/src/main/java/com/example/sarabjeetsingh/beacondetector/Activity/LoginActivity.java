@@ -21,7 +21,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.parse.LogInCallback;
@@ -71,6 +75,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope(Scopes.PROFILE))
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                .requestProfile()
                 .requestEmail()
                 .build();
         // [END configure_signin]
@@ -81,6 +88,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addApi(Plus.API)
                 .build();
         // [END build_client]
 
@@ -101,26 +109,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onStart() {
         super.onStart();
 
-//        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-//        if (opr.isDone()) {
-//            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
-//            // and the GoogleSignInResult will be available instantly.
-//            Log.d(TAG, "Got cached sign-in");
-//            GoogleSignInResult result = opr.get();
-//            handleSignInResult(result);
-//        } else {
-//            // If the user has not previously signed in on this device or the sign-in has expired,
-//            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
-//            // single sign-on will occur in this branch.
-//            showProgressDialog();
-//            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-//                @Override
-//                public void onResult(GoogleSignInResult googleSignInResult) {
-//                    hideProgressDialog();
-//                    handleSignInResult(googleSignInResult);
-//                }
-//            });
-//        }
+        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if (opr.isDone()) {
+            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
+            // and the GoogleSignInResult will be available instantly.
+            Log.d(TAG, "Got cached sign-in");
+            GoogleSignInResult result = opr.get();
+            handleSignInResult(result);
+        } else {
+            // If the user has not previously signed in on this device or the sign-in has expired,
+            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
+            // single sign-on will occur in this branch.
+            showProgressDialog();
+            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(GoogleSignInResult googleSignInResult) {
+                    hideProgressDialog();
+                    handleSignInResult(googleSignInResult);
+                }
+            });
+        }
     }
 
     // [START onActivityResult]
@@ -144,7 +152,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
-            showProgressDialog();
+
             GoogleSignInAccount acct = result.getSignInAccount();
             personName = acct.getDisplayName();
             personEmail = acct.getEmail();
@@ -152,8 +160,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
             Log.d(TAG, personEmail +", "+ personName + ", " + personId);
-            if( mGoogleApiClient.hasConnectedApi(Plus.API)){
-
+                showProgressDialog();
                 Person person  = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
                 if(person.getGender() == 0){
                     gender = "male";
@@ -162,13 +169,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
 
                 personPhoto = person.getImage().getUrl();
-                Log.d(TAG, personName + ", " + id + ", " + email + ", " + personPhoto);
+                Log.d(TAG, personName + ", " + personId + ", " + personEmail + ", " + personPhoto + " " + gender);
                 ParseLogin(personEmail, personId);
+
             }
 
 
         }
-    }
+
     // [END handleSignInResult]
 
     // [START signIn]
@@ -215,6 +223,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void done(ParseUser user, ParseException err) {
                 if (user == null) {
+                    Log.d("Error", err.getMessage() + " " + err.toString());
+                    Toast.makeText(LoginActivity.this, err.getMessage() + " " + err.toString(), Toast.LENGTH_LONG).show();
                     Log.d("MyApp", "Uh oh. The user cancelled the Facebook login.");
                 } else if (user.isNew()) {
                     makeMeRequest();
@@ -324,6 +334,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+        mGoogleApiClient.reconnect();
     }
 
     public void ParseLogin(final String email, final String password){

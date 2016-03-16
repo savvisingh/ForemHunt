@@ -19,6 +19,7 @@ public class ZPreferences {
     private static final String USER_GENDER = "user_gender";
     private static final String USER_PicURL = "user_ProfilePicUrl";
     private static final String AUTH_TYPE="auth_type";
+    private static final String HUNT_LEVEL="user_current_level";
 
 
     public static void setIsUserLogin(Context context, boolean isUserSignUp) {
@@ -47,6 +48,20 @@ public class ZPreferences {
         SharedPreferences savedSession = context.getSharedPreferences(KEY,
                 Context.MODE_PRIVATE);
         return savedSession.getString(USER_Name, "");
+    }
+
+    public static void setHuntLevel(Context context, String name) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(KEY, Context.MODE_PRIVATE)
+                .edit();
+        editor.putString(HUNT_LEVEL, name);
+        editor.commit();
+    }
+
+    public static String getHuntLevel(Context context) {
+
+        SharedPreferences savedSession = context.getSharedPreferences(KEY,
+                Context.MODE_PRIVATE);
+        return savedSession.getString(HUNT_LEVEL, "0");
     }
 
 

@@ -1,6 +1,12 @@
 package com.example.sarabjeetsingh.beacondetector.Activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -8,42 +14,49 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.sarabjeetsingh.beacondetector.GroupRegistration;
+import com.bumptech.glide.Glide;
 import com.example.sarabjeetsingh.beacondetector.R;
+import com.example.sarabjeetsingh.beacondetector.adapters.LevelAdapter;
+import com.example.sarabjeetsingh.beacondetector.adapters.MembersAdapter;
+import com.example.sarabjeetsingh.beacondetector.utils.MyApplication;
+import com.example.sarabjeetsingh.beacondetector.utils.ZPreferences;
+import com.mikhaellopez.circularimageview.CircularImageView;
+import com.parse.ParseUser;
+
+import org.altbeacon.beacon.BeaconManager;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    private ViewPager mViewPager;
-
+    String [] level_hints;
+    TypedArray level_images;
     DrawerLayout drawer;
-
+    NavigationView navigationView;
+    RecyclerView recyclerView;
+    LevelAdapter levelAdapter;
+    TextView textViewHint;
+    ImageView imageViewHint;
+    int currentLevel = 0;
+    CoordinatorLayout coordinatorLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,57 +64,65 @@ public class HomeActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        verifyBluetooth();
+
+        currentLevel = Integer.valueOf(ZPreferences.getHuntLevel(this));
+
+        level_hints = getResources().getStringArray(R.array.level_hints);
+        level_images  = getResources().obtainTypedArray(R.array.level_images);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+
         getSupportActionBar().setHomeButtonEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSupportActionBar().setTitle(" ");
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+
+        textViewHint = (TextView) findViewById(R.id.text_level_hint);
+        imageViewHint = (ImageView) findViewById(R.id.image_level_hint);
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        setUserDetails();
+
+       levelAdapter = new LevelAdapter(this, currentLevel);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerViewLevels);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerView.setAdapter(levelAdapter);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+
+        levelAdapter.SetOnItemClickListener(new LevelAdapter.OnItemClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onItemClick(View view, int position) {
+
+                if(position <= currentLevel){
+                    updateLevel(position);
+                }else {
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "Level is Locked", Snackbar.LENGTH_LONG);
+                    snackbar.show();
+                }
             }
         });
-
-         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer.setDrawerListener(toggle);
-//        toggle.syncState();
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
-        for (int i = 0; i < tabLayout.getTabCount(); i++) {
-            TabLayout.Tab tab = tabLayout.getTabAt(i);
-            switch (i){
-                case 0:
-                    tab.setIcon(R.drawable.home_tab_selector);
-                    break;
-                case 1:
-                    tab.setIcon(R.drawable.rules_selector);
-                    break;
-                case 2:
-                    tab.setIcon(R.drawable.create_group_selector);
-                    break;
-            }
-
-        }
-
-
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
+    public void setUserDetails(){
+        View headerLayout = navigationView.getHeaderView(0);
+        CircularImageView userImageView = (CircularImageView) headerLayout.findViewById(R.id.user_imageview);
+        TextView userName = (TextView) headerLayout.findViewById(R.id.user_name);
+        TextView userEmail = (TextView) headerLayout.findViewById(R.id.user_email);
+
+        ParseUser user = ParseUser.getCurrentUser();
+       Glide.with(this).load(user.get("profilePic")).into(userImageView);
+        if(user.get("lastName") == null){
+            userName.setText(user.get("firstName") + " ");
+        }else userName.setText(user.get("firstName") + " " + user.get("lastName"));
+
+        userEmail.setText(user.getEmail());
+
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -149,12 +170,12 @@ public class HomeActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
+        }  else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        }else if(id == R.id.nav_create_group){
+            Intent intent = new Intent(this, GroupRegistration.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -162,73 +183,83 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
+    public void logToDisplay(final String level) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                currentLevel = Integer.valueOf(level);
+                updateLevel(currentLevel);
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+            }
+        });
+    }
 
-        public PlaceholderFragment() {
-        }
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((MyApplication) this.getApplicationContext()).setMonitoringActivity(this);
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main_tab, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
+        currentLevel = Integer.valueOf(ZPreferences.getHuntLevel(this));
+        if(currentLevel >= 0){
+            updateLevel(currentLevel);
         }
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    @Override
+    public void onPause() {
+        super.onPause();
+        ((MyApplication) this.getApplicationContext()).setMonitoringActivity(null);
+    }
 
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
+    public void updateLevel(int level){
 
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            switch (position){
-                case 0:
-                    return PlaceholderFragment.newInstance(position + 1);
-                case 1:
-                    return PlaceholderFragment.newInstance(position + 1);
-                case 2:
-                    return GroupRegistration.newInstance();
-                default:
-                    return PlaceholderFragment.newInstance(position + 1);
+        textViewHint.setText(level_hints[level] + " ");
+        Log.d("ImageResource", String.valueOf(level_images.getResourceId(level, -1)));
+        imageViewHint.setImageResource(level_images.getResourceId(level, -1));
+
+        levelAdapter.notifyItemChanged(level);
+
+    }
+
+
+    private void verifyBluetooth() {
+
+        try {
+            if (!BeaconManager.getInstanceForApplication(this).checkAvailability()) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Bluetooth not enabled");
+                builder.setMessage("Please enable bluetooth in settings and restart this application.");
+                builder.setPositiveButton(android.R.string.ok, null);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            finish();
+                            System.exit(0);
+                        }
+                    });
+                }
+                builder.show();
             }
-
         }
+        catch (RuntimeException e) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Bluetooth LE not available");
+            builder.setMessage("Sorry, this device does not support Bluetooth LE.");
+            builder.setPositiveButton(android.R.string.ok, null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 3;
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        finish();
+                        System.exit(0);
+                    }
+
+                });
+            }
+            builder.show();
+
         }
 
     }

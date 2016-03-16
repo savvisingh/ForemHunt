@@ -13,15 +13,9 @@
         android:theme="@style/AppTheme">
         <activity android:name=".Activity.RangingActivity" />
         <activity
-            android:name=".Activity.MainActivity"
-            android:label="@string/title_activity_main"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
             android:name=".Activity.HomeActivity"
             android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -41,6 +35,16 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".Activity.GroupRegistration"
+            android:label="@string/title_activity_group_registration"
+            android:parentActivityName=".Activity.HomeActivity"
+            android:theme="@style/AppTheme"
+            android:launchMode="singleTop">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.sarabjeetsingh.beacondetector.Activity.HomeActivity" />
         </activity>
     </application>
 

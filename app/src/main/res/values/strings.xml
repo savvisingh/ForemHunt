@@ -13,4 +13,42 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_group">Sorry You are not added to any group yet. Ask your friends to send you an Invite Or </string>
+    <string name="invite_frnds_text">Sorry, no member added yet, go to Available to add friends Or</string>
+    <string name="title_activity_group_registration">GroupRegistration</string>
+    <string name="game_rules">"•	A team would be up to 4 members.
+•	There will be clues for six different location.
+•	The members are required to have application, ‘Forem Hunt’ downloaded from Play Store.
+•	Treasure shall be awarded to the team if and only if all the members are present at each location
+•	The team which will reach the final destination first would be regarded as winner!"
+</string>
+<string-array name="level_hints">
+    <item>"’One who has set us free One who has planted the tree, One who was bold enough, Firm and stubborn but never rough. Pay him tribute at the place you seldom visit."</item>
+    <item>"All shining in white with a beautiful gaze You look around the campus and find the place"</item>
+    <item>"Nightangle of India"</item>
+    <item>"Jinka ho jata hai unka facebook status aajata hai, Jinka nahi hota unka facebook band ho jata hai. Isi ke samksh loge tum apni upadhi, Nahi le paaye toh Ghar waale bana denge Samadhi"</item>
+    <item>"Follow the trail"</item>
+    <item>"Guess what ???"</item>
+
+</string-array>
+
+    <array name="level_images">
+        <item>@drawable/login_screen_image</item>
+        <item>@drawable/image_level5_hint</item>
+        <item>@drawable/image_level6_hint</item>
+        <item>@drawable/login_screen_image</item>
+        <item>@drawable/image_level3_hint</item>
+        <item>@drawable/login_screen_image</item>
+
+    </array>
+
+    <string-array name="instanceId_beacons">
+    <item>"0x0117c551331e"</item>
+    <item>"0x0117c554eef0"</item>
+    <item>"0x0117c55bd9fd"</item>
+    <item>"0117C551331E"</item>
+    <item>"0117C551331E"</item>
+    <item>"0117C551331E"</item>
+    </string-array>
+
 </resources>

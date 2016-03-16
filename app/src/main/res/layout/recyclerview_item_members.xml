@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="70dp"
+    android:gravity="center_vertical">
+
+    <LinearLayout
+        android:layout_weight="1.5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:gravity="center">
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:id="@+id/user_imageview"
+            android:src="@drawable/com_facebook_profile_picture_blank_portrait"
+            app:civ_border_color="#000"
+            app:civ_border_width="1dp"
+           />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="3"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="Sarabjeet Singh "
+            android:singleLine="true"
+            android:fontFamily="sans-serif"
+            android:textColor="#000"
+            android:id="@+id/user_name"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Invite"
+            android:id="@+id/action_button"/>
+    </LinearLayout>
+
+</LinearLayout>
